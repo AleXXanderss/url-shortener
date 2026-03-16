@@ -2207,24 +2207,25 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\tipir\\.nuget\\packages\\": {}
+    "/home/alexxanders/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\tipir\\UrlShortener\\UrlShortener.Api\\UrlShortener.Api.csproj",
+      "projectUniqueName": "/home/alexxanders/url-shortener/UrlShortener.Api/UrlShortener.Api.csproj",
       "projectName": "UrlShortener.Api",
-      "projectPath": "C:\\Users\\tipir\\UrlShortener\\UrlShortener.Api\\UrlShortener.Api.csproj",
-      "packagesPath": "C:\\Users\\tipir\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\tipir\\UrlShortener\\UrlShortener.Api\\obj\\",
+      "projectPath": "/home/alexxanders/url-shortener/UrlShortener.Api/UrlShortener.Api.csproj",
+      "packagesPath": "/home/alexxanders/.nuget/packages/",
+      "outputPath": "/home/alexxanders/url-shortener/UrlShortener.Api/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\tipir\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/home/alexxanders/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
+        "/usr/lib/dotnet/library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -2287,7 +2288,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.104/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
