@@ -4,14 +4,20 @@ public class ShortCodeService
 {
     private const string Alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-    private readonly Random _random = new();
-
-    public string Generate(int length = 6)
+    public string Encode(int id)
     {
-        return new string(
-            Enumerable.Range(0, length)
-            .Select(_=> Alphabet[_random.Next(Alphabet.Length)])
-            .ToArray()
-        );
+        if (id == 0)
+            return Alphabet[0].ToString();
+
+            var chars = new List<char>();
+
+            while (id > 0)
+        {
+            chars.Add(Alphabet[id % Alphabet.Length]);
+            id /= Alphabet.Length;
+        }
+
+        chars.Reverse();
+        return new string(chars.ToArray());
+        }
     }
-}

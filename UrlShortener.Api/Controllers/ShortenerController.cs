@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using UrlShortener.Api.Services;
 using UrlShortener.Api.Data;
 using UrlShortener.Api.Models;
@@ -20,24 +21,52 @@ public class ShortenerController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateLinkRequest request)
+public async Task<IActionResult> Create(CreateLinkRequest request)
+{
+    if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var uri) ||
+        (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
     {
-        var code = _shortCodeService.Generate();
+        return BadRequest("Invalid URL");
+    }
 
-        var link = new Link
+    var link = new Link
+    {
+        OriginalUrl = request.Url,
+        CreatedAt = DateTime.UtcNow,
+        ClickCount = 0
+    };
+
+    _db.Links.Add(link);
+    await _db.SaveChangesAsync();
+
+    // теперь у нас есть Id
+    link.ShortCode = _shortCodeService.Encode(link.Id);
+
+    await _db.SaveChangesAsync();
+
+    var shortUrl = $"{Request.Scheme}://{Request.Host}/r/{link.ShortCode}";
+
+    return Ok(new
+    {
+        shortUrl
+    });
+}
+
+    [HttpGet("/r/{code}")]
+    public async Task<IActionResult> RedirectToOriginal(string code)
+    {
+        var link = await _db.Links
+            .FirstOrDefaultAsync(l => l.ShortCode == code);
+
+        if (link == null)
         {
-            OriginalUrl = request.Url,
-            ShortCode = code,
-            CreatedAt = DateTime.UtcNow
-        };
+            return NotFound("Link not found");
+        }
 
-        _db.Links.Add(link);
+        link.ClickCount++;
 
         await _db.SaveChangesAsync();
 
-        return Ok(new
-        {
-            shortCode = code
-        });
+        return Redirect(link.OriginalUrl);
     }
 }
