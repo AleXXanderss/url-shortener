@@ -8,7 +8,10 @@ RUN dotnet publish UrlShortener.Api/UrlShortener.Api.csproj -c Release -o /app/p
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y libkrb5-3
+# фикс для Npgsql
+RUN apt-get update && \
+    apt-get install -y libkrb5-3 libssl3 && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/publish .
 

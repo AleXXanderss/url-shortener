@@ -1,49 +1,62 @@
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using UrlShortener.Api.Data;
 using UrlShortener.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DB
+// ---------------- DB ----------------
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
-// Services
+// ---------------- Redis ----------------
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    return ConnectionMultiplexer.Connect("redis:6379");
+});
+
+// ---------------- Services ----------------
 builder.Services.AddScoped<ShortCodeService>();
+builder.Services.AddScoped<RedirectService>();
 builder.Services.AddSingleton<ClickQueuePublisher>();
 builder.Services.AddHostedService<ClickQueueWorker>();
 
+// ---------------- Controllers ----------------
 builder.Services.AddControllers();
+
+// ---------------- Swagger ----------------
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// ---------------- Swagger ----------------
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// ---------------- DB Migration ----------------
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    var retries = 30;
-
-    while (retries > 0)
+    for (int i = 0; i < 10; i++)
     {
         try
         {
-            Console.WriteLine("Trying to migrate DB...");
+            Console.WriteLine("Applying migrations...");
             db.Database.Migrate();
-            Console.WriteLine("DB READY");
+            Console.WriteLine("DB ready");
             break;
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine($"DB not ready: {ex.Message}");
-            retries--;
+            Console.WriteLine("DB not ready, retry...");
             Thread.Sleep(2000);
         }
     }
-
-    if (retries == 0)
-        throw new Exception("Database never became ready");
 }
 
+// ---------------- Routes ----------------
 app.MapControllers();
 
 app.Run();

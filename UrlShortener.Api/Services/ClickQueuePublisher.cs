@@ -1,63 +1,67 @@
 using RabbitMQ.Client;
 using System.Text;
 
-namespace UrlShortener.Api.Services;
-
-public class ClickQueuePublisher
+namespace UrlShortener.Api.Services
 {
-    private IConnection _connection;
-    private IModel _channel;
-
-    public ClickQueuePublisher(IConfiguration config)
+    public class ClickQueuePublisher : IDisposable
     {
-        var host = config["RabbitMQ:Host"] ?? "rabbitmq";
-        ConnectWithRetry(host);
-    }
+        private readonly IConnection _connection;
+        private readonly IModel _channel;
 
-    private void ConnectWithRetry(string host)
-    {
-        var factory = new ConnectionFactory()
+        public ClickQueuePublisher()
         {
-            HostName = host
-        };
-
-        while (true)
-        {
-            try
+            var factory = new ConnectionFactory()
             {
-                Console.WriteLine("Publisher connecting to RabbitMQ...");
+                HostName = "rabbitmq"
+            };
 
-                _connection = factory.CreateConnection();
-                _channel = _connection.CreateModel();
-
-                _channel.QueueDeclare(
-                    queue: "clicks",
-                    durable: false,
-                    exclusive: false,
-                    autoDelete: false,
-                    arguments: null
-                );
-
-                Console.WriteLine("Publisher connected");
-                break;
-            }
-            catch
+            // retry на случай, если RabbitMQ еще не поднялся
+            for (int i = 0; i < 10; i++)
             {
-                Console.WriteLine("RabbitMQ not ready (publisher), retrying...");
-                Thread.Sleep(2000);
+                try
+                {
+                    Console.WriteLine("Connecting to RabbitMQ...");
+
+                    _connection = factory.CreateConnection();
+                    _channel = _connection.CreateModel();
+
+                    _channel.QueueDeclare(
+                        queue: "clicks",
+                        durable: false,
+                        exclusive: false,
+                        autoDelete: false,
+                        arguments: null
+                    );
+
+                    Console.WriteLine("Connected to RabbitMQ");
+                    return;
+                }
+                catch
+                {
+                    Console.WriteLine("RabbitMQ not ready, retrying...");
+                    Thread.Sleep(2000);
+                }
             }
+
+            throw new Exception("Failed to connect to RabbitMQ");
         }
-    }
 
-    public void Publish(string shortCode)
-    {
-        var body = Encoding.UTF8.GetBytes(shortCode);
+        public void Publish(string shortCode)
+        {
+            var body = Encoding.UTF8.GetBytes(shortCode);
 
-        _channel.BasicPublish(
-            exchange: "",
-            routingKey: "clicks",
-            basicProperties: null,
-            body: body
-        );
+            _channel.BasicPublish(
+                exchange: "",
+                routingKey: "clicks",
+                basicProperties: null,
+                body: body
+            );
+        }
+
+        public void Dispose()
+        {
+            _channel?.Close();
+            _connection?.Close();
+        }
     }
 }
