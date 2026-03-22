@@ -1,32 +1,48 @@
 using Microsoft.EntityFrameworkCore;
 using UrlShortener.Api.Data;
 using UrlShortener.Api.Services;
-using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// PostgreSQL
+// DB
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
-// Redis (ВАЖНО)
-var redisConnection = builder.Configuration.GetConnectionString("Redis");
-
-builder.Services.AddSingleton<IConnectionMultiplexer>(
-    ConnectionMultiplexer.Connect(redisConnection));
-
 // Services
 builder.Services.AddScoped<ShortCodeService>();
+builder.Services.AddSingleton<ClickQueuePublisher>();
+builder.Services.AddHostedService<ClickQueueWorker>();
 
-// Controllers + Swagger
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    var retries = 30;
+
+    while (retries > 0)
+    {
+        try
+        {
+            Console.WriteLine("Trying to migrate DB...");
+            db.Database.Migrate();
+            Console.WriteLine("DB READY");
+            break;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"DB not ready: {ex.Message}");
+            retries--;
+            Thread.Sleep(2000);
+        }
+    }
+
+    if (retries == 0)
+        throw new Exception("Database never became ready");
+}
 
 app.MapControllers();
 

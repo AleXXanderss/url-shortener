@@ -21,7 +21,8 @@ namespace UrlShortener.Api.Migrations
                     OriginalUrl = table.Column<string>(type: "text", nullable: false),
                     ShortCode = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ClickCount = table.Column<int>(type: "integer", nullable: false)
+                    ClickCount = table.Column<int>(type: "integer", nullable: false),
+                    Clicks = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

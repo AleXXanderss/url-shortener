@@ -12,7 +12,7 @@ using UrlShortener.Api.Data;
 namespace UrlShortener.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260316080552_InitialCreate")]
+    [Migration("20260322142349_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -34,6 +34,9 @@ namespace UrlShortener.Api.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ClickCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Clicks")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")

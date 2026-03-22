@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using StackExchange.Redis;
 using UrlShortener.Api.Services;
 using UrlShortener.Api.Data;
 using UrlShortener.Api.Models;
@@ -14,16 +12,16 @@ public class ShortenerController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly ShortCodeService _shortCodeService;
-    private readonly IDatabase _cache;
+    private readonly RedirectService _redirectService;
 
     public ShortenerController(
         AppDbContext db,
         ShortCodeService shortCodeService,
-        IConnectionMultiplexer redis)
+        RedirectService redirectService)
     {
         _db = db;
         _shortCodeService = shortCodeService;
-        _cache = redis.GetDatabase();
+        _redirectService = redirectService;
     }
 
     [HttpPost]
@@ -45,7 +43,6 @@ public class ShortenerController : ControllerBase
         _db.Links.Add(link);
         await _db.SaveChangesAsync();
 
-        // генерим код из Id
         link.ShortCode = _shortCodeService.Encode(link.Id);
         await _db.SaveChangesAsync();
 
@@ -57,34 +54,13 @@ public class ShortenerController : ControllerBase
     [HttpGet("/r/{code}")]
     public async Task<IActionResult> RedirectToOriginal(string code)
     {
-        var cacheKey = $"link:{code}";
+        var url = await _redirectService.GetOriginalUrlAsync(code);
 
-
-        var cachedUrl = await _cache.StringGetAsync(cacheKey);
-        if (!cachedUrl.IsNullOrEmpty)
-        {
-            return Redirect(cachedUrl!);
-        }
-
-  
-        var link = await _db.Links
-            .FirstOrDefaultAsync(l => l.ShortCode == code);
-
-        if (link == null)
-        {
+        if (url == null)
             return NotFound("Link not found");
-        }
 
+        await _redirectService.IncrementClickAsync(code);
 
-        await _cache.StringSetAsync(
-            cacheKey,
-            link.OriginalUrl,
-            TimeSpan.FromMinutes(10));
-
-       
-        link.ClickCount++;
-        await _db.SaveChangesAsync();
-
-        return Redirect(link.OriginalUrl);
+        return Redirect(url);
     }
 }

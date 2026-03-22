@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "A6+kAmguloI=",
+  "dgSpecHash": "2uWGTpUrEvk=",
   "success": true,
   "projectFilePath": "C:\\Users\\tipir\\UrlShortener\\UrlShortener.Api\\UrlShortener.Api.csproj",
   "expectedPackageFiles": [
@@ -27,6 +27,7 @@
     "C:\\Users\\tipir\\.nuget\\packages\\npgsql\\10.0.2\\npgsql.10.0.2.nupkg.sha512",
     "C:\\Users\\tipir\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\10.0.1\\npgsql.entityframeworkcore.postgresql.10.0.1.nupkg.sha512",
     "C:\\Users\\tipir\\.nuget\\packages\\pipelines.sockets.unofficial\\2.2.8\\pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
+    "C:\\Users\\tipir\\.nuget\\packages\\rabbitmq.client\\6.8.1\\rabbitmq.client.6.8.1.nupkg.sha512",
     "C:\\Users\\tipir\\.nuget\\packages\\stackexchange.redis\\2.12.4\\stackexchange.redis.2.12.4.nupkg.sha512",
     "C:\\Users\\tipir\\.nuget\\packages\\swashbuckle.aspnetcore\\10.1.5\\swashbuckle.aspnetcore.10.1.5.nupkg.sha512",
     "C:\\Users\\tipir\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\10.1.5\\swashbuckle.aspnetcore.swagger.10.1.5.nupkg.sha512",

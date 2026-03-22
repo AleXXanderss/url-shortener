@@ -11,4 +11,6 @@ public class Link
     public DateTime CreatedAt { get; set; } //когда создали ссылку
 
     public int ClickCount { get; set; }
+    
+    public int Clicks { get; set; } = 0;
 }

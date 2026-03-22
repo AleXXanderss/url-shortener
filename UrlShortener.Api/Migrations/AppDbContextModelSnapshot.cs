@@ -33,6 +33,9 @@ namespace UrlShortener.Api.Migrations
                     b.Property<int>("ClickCount")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Clicks")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
