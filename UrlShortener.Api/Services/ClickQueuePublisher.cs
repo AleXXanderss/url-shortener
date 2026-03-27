@@ -5,17 +5,21 @@ namespace UrlShortener.Api.Services
 {
     public class ClickQueuePublisher : IDisposable
     {
+        private readonly IConfiguration _config;
         private readonly IConnection _connection;
         private readonly IModel _channel;
 
-        public ClickQueuePublisher()
+        public ClickQueuePublisher(IConfiguration config)
         {
+            _config = config;
+
+            var host = _config["RabbitMQ:Host"];
+
             var factory = new ConnectionFactory()
             {
-                HostName = "rabbitmq"
+                HostName = host
             };
 
-            // retry на случай, если RabbitMQ еще не поднялся
             for (int i = 0; i < 10; i++)
             {
                 try

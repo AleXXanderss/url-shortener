@@ -6,7 +6,6 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using UrlShortener.Api.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
 
 namespace UrlShortener.Api.Services;
 
@@ -26,9 +25,11 @@ public class ClickQueueWorker : BackgroundService
 
     private void ConnectWithRetry()
     {
+        var host = _config["RabbitMQ:Host"];
+
         var factory = new ConnectionFactory()
         {
-            HostName = _config["RabbitMQ:Host"] ?? "rabbitmq"
+            HostName = host
         };
 
         while (true)
@@ -52,21 +53,15 @@ public class ClickQueueWorker : BackgroundService
             }
             catch
             {
-                Console.WriteLine("RabbitMQ not ready, retrying...");
+                Console.WriteLine("RabbitMQ not ready");
                 Thread.Sleep(2000);
             }
         }
     }
 
-    private void EnsureConnection()
-    {
-        if (_connection != null && _connection.IsOpen) return;
-        ConnectWithRetry();
-    }
-
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        EnsureConnection();
+        ConnectWithRetry();
 
         var consumer = new EventingBasicConsumer(_channel!);
 
@@ -86,13 +81,12 @@ public class ClickQueueWorker : BackgroundService
                 await db.SaveChangesAsync();
             }
 
-       
             _channel!.BasicAck(ea.DeliveryTag, false);
         };
 
         _channel!.BasicConsume(
             queue: "clicks",
-            autoAck: false, 
+            autoAck: false,
             consumer: consumer);
 
         return Task.CompletedTask;

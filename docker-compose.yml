@@ -12,6 +12,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=urlshortener;Username=postgres;Password=postgres
+      - Redis__Configuration=redis:6379
+      - RabbitMQ__Host=rabbitmq
 
   postgres:
     image: postgres:15

@@ -5,36 +5,41 @@ using UrlShortener.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ---------------- DB ----------------
+// DB
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
-// ---------------- Redis ----------------
+// Redis (через конфиг)
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    return ConnectionMultiplexer.Connect("redis:6379");
+    var config = builder.Configuration["Redis:Configuration"];
+
+    if (string.IsNullOrEmpty(config))
+        throw new Exception("Redis configuration is missing");
+
+    return ConnectionMultiplexer.Connect(config);
 });
 
-// ---------------- Services ----------------
+// Services
 builder.Services.AddScoped<ShortCodeService>();
 builder.Services.AddScoped<RedirectService>();
 builder.Services.AddSingleton<ClickQueuePublisher>();
 builder.Services.AddHostedService<ClickQueueWorker>();
 
-// ---------------- Controllers ----------------
+// Controllers
 builder.Services.AddControllers();
 
-// ---------------- Swagger ----------------
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// ---------------- Swagger ----------------
+// Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// ---------------- DB Migration ----------------
+// DB Migration
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -56,7 +61,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// ---------------- Routes ----------------
+// Routes
 app.MapControllers();
 
 app.Run();
