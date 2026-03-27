@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using UrlShortener.Api.Data;
 using UrlShortener.Api.Services;
+using UrlShortener.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,15 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
-// Redis (через конфиг)
+// Redis
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    var config = builder.Configuration["Redis:Configuration"];
-
-    if (string.IsNullOrEmpty(config))
-        throw new Exception("Redis configuration is missing");
-
-    return ConnectionMultiplexer.Connect(config);
+    var connectionString = builder.Configuration.GetConnectionString("Redis") ?? "redis:6379";
+    return ConnectionMultiplexer.Connect(connectionString);
 });
 
 // Services
@@ -34,6 +31,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 // Swagger
 app.UseSwagger();

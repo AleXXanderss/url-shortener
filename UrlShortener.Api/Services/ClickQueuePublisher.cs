@@ -1,19 +1,17 @@
 using RabbitMQ.Client;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace UrlShortener.Api.Services
 {
     public class ClickQueuePublisher : IDisposable
     {
-        private readonly IConfiguration _config;
         private readonly IConnection _connection;
         private readonly IModel _channel;
 
         public ClickQueuePublisher(IConfiguration config)
         {
-            _config = config;
-
-            var host = _config["RabbitMQ:Host"];
+            var host = config["RabbitMQ:Host"] ?? "rabbitmq";
 
             var factory = new ConnectionFactory()
             {
