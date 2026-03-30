@@ -13,8 +13,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Redis
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("Redis") ?? "redis:6379";
-    return ConnectionMultiplexer.Connect(connectionString);
+    var config = builder.Configuration["Redis:Configuration"]
+                 ?? builder.Configuration.GetConnectionString("Redis")
+                 ?? "redis:6379";
+
+    return ConnectionMultiplexer.Connect(config);
 });
 
 // Services
@@ -31,7 +34,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
