@@ -15,7 +15,7 @@ function App() {
       setLoading(true);
       setCopied(false);
 
-      const res = await axios.post("http://localhost:8080/api/shorten", {
+      const res = await axios.post("/api/shorten", {
         url
       });
 

@@ -10,10 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
-// Redis
+// Redis (FIX)
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    var config = builder.Configuration["Redis:Configuration"]
+    var config = builder.Configuration["Redis__Configuration"]
                  ?? builder.Configuration.GetConnectionString("Redis")
                  ?? "redis:6379";
 
@@ -29,7 +29,7 @@ builder.Services.AddHostedService<ClickQueueWorker>();
 // Controllers
 builder.Services.AddControllers();
 
-// CORS (NEW)
+// CORS (оставляем как есть)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
@@ -50,7 +50,6 @@ var app = builder.Build();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
-// CORS (NEW)
 app.UseCors("AllowFrontend");
 
 // Swagger

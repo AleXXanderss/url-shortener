@@ -7,3 +7,4 @@ obj/
 *.env
 .env
 frontend/node_modules
+frontend/.env
