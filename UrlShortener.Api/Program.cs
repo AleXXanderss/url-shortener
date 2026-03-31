@@ -29,6 +29,19 @@ builder.Services.AddHostedService<ClickQueueWorker>();
 // Controllers
 builder.Services.AddControllers();
 
+// CORS (NEW)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -36,6 +49,9 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
+
+// CORS (NEW)
+app.UseCors("AllowFrontend");
 
 // Swagger
 app.UseSwagger();
